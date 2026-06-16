@@ -1,0 +1,26 @@
+{
+  "name": "Go CRUD App",
+  "image": "mcr.microsoft.com/devcontainers/go:1.21",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "GoCRUD App",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "postCreateCommand": "go mod tidy && go mod download",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go"
+      ],
+      "settings": {
+        "go.toolsManagement.checkForUpdates": "local",
+        "go.useLanguageServer": true
+      }
+    }
+  }
+}

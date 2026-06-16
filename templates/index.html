@@ -1,0 +1,173 @@
+{{define "index.html"}}
+{{template "base" .}}
+{{end}}
+
+{{define "content"}}
+<style>
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+  .page-title { font-size: 1.6rem; font-weight: 700; }
+  .page-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; }
+
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    background: var(--surface2);
+    padding: 0.9rem 1.2rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  td { padding: 1rem 1.2rem; font-size: 0.9rem; vertical-align: middle; }
+
+  .product-name { font-weight: 600; }
+  .product-desc { color: var(--text-muted); font-size: 0.82rem; margin-top: 2px; }
+
+  .price { font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+  .stock-low  { color: var(--danger); }
+  .stock-ok   { color: var(--success); }
+
+  .actions { display: flex; gap: 0.5rem; }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+  }
+  .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty-state h3 { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text); }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+  }
+  .stat-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-value { font-size: 1.8rem; font-weight: 700; margin-top: 0.3rem; }
+</style>
+
+{{if .Error}}
+  <div class="alert alert-error">⚠️ {{.Error}}</div>
+{{end}}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Manajemen Produk</h1>
+    <p class="page-subtitle">Kelola data produk dengan mudah</p>
+  </div>
+</div>
+
+{{if .Products}}
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-label">Total Produk</div>
+    <div class="stat-value" style="color:var(--accent)">{{len .Products}}</div>
+  </div>
+</div>
+{{end}}
+
+<div class="table-wrap">
+  {{if .Products}}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Produk</th>
+        <th>Harga</th>
+        <th>Stok</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Products}}
+      <tr>
+        <td><span class="badge">{{.ID}}</span></td>
+        <td>
+          <div class="product-name">{{.Name}}</div>
+          {{if .Description}}<div class="product-desc">{{.Description}}</div>{{end}}
+        </td>
+        <td class="price">Rp {{printf "%.0f" .Price}}</td>
+        <td>
+          {{if lt .Stock 5}}
+            <span class="stock-low">⚠ {{.Stock}} pcs</span>
+          {{else}}
+            <span class="stock-ok">✓ {{.Stock}} pcs</span>
+          {{end}}
+        </td>
+        <td>
+          <div class="actions">
+            <a href="/products/edit?id={{.ID}}" class="btn btn-edit">✏ Edit</a>
+            <form method="POST" action="/products/delete" onsubmit="return confirm('Yakin hapus produk ini?')">
+              <input type="hidden" name="id" value="{{.ID}}">
+              <button type="submit" class="btn btn-danger">🗑 Hapus</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <div class="empty-state">
+    <div class="empty-icon">📦</div>
+    <h3>Belum ada produk</h3>
+    <p>Mulai dengan menambahkan produk pertama kamu</p>
+    <br/>
+    <a href="/products/create" class="btn btn-primary">+ Tambah Produk</a>
+  </div>
+  {{end}}
+</div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const msg = params.get('success');
+  if (msg) {
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-success';
+    alert.textContent = '✓ ' + decodeURIComponent(msg);
+    document.querySelector('main').prepend(alert);
+    setTimeout(() => alert.remove(), 4000);
+  }
+</script>
+{{end}}
